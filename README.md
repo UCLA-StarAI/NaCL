@@ -1,5 +1,5 @@
 # NaCL
-Code and experiments for the paper "What to Expect of Classifiers? Reasoning about Logistic Regression with Missing Features", published in IJCAI 2019. 
+Code and experiments for the paper "[What to Expect of Classifiers? Reasoning about Logistic Regression with Missing Features](http://starai.cs.ucla.edu/papers/KhosraviIJCAI19.pdf)", published in IJCAI 2019. 
 
 Given a logistic regression (LR) model, NaCL learns a Naive Bayes model that conforms with the LR model (if used as a classifier gives out exactly same class conditional probabilities) and at the same time maximizes the joint feature likelihood P(X) on the dataset. Then, the Naive Bayes model can be used to handle missing features while having performance as good as LR when no features are missing.
 
