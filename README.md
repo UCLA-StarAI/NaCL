@@ -16,6 +16,6 @@ For examples of how to run the code, please refer to the notebooks folder. Addit
 
 # Runtime
 
-Empirically, the runtime for the solver seems to grow quadratically with number of features. On MNIST and Fashion datasets the solver we used takes between 20-30min to train.
+Empirically, the runtime for the solver seems to grow quadratically with number of features and classes. On MNIST and Fashion datasets (with 784 features and 10 classes) the solver we used takes between 20-30min to train.
 
 We included implementation of NaCL in two Geometric Programming library. For best performance, we recommend using the GPKit version (the python files ending with "_GP") with Mosek backend. The ipython notebook examples use the GPKit version.

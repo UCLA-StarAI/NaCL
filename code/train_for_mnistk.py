@@ -8,6 +8,10 @@ import utils
 import keras
 import LR2NBK_GP
 
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--remove", help="remove #")
+
 sys.setrecursionlimit(2000000)
 
 (X_train, y_train), (X_test, y_test) = keras.datasets.mnist.load_data()
@@ -37,13 +41,18 @@ X_train_raw = X_train.reshape(-1, 28*28)
 X_test_raw  = X_test.reshape(-1, 28*28)
 
 ##
-remove = 0
+args = parser.parse_args()
+print ("Remove: {}".format(args.remove)) # used to remove some features mostly for benchmarking the gp solver
+remove = int(args.remove)
 choose = np.array([ 1 if (28*remove-1<i<28*(28-remove)) and (remove <= i%28 < 28-remove) else 0 for i in range(X_train_raw.shape[1]) ])
 
 inds = np.array(np.where(choose ==1)).flatten()
 
 X_train = X_train_raw[:, inds]
 X_test  = X_test_raw[:, inds]
+
+print("X_train.shape = {}".format(X_train.shape))
+print("X_test.shape = {}".format(X_test.shape))
 
 clf = LogisticRegression(solver='lbfgs', 
     multi_class='multinomial',

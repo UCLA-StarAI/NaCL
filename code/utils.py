@@ -1,4 +1,3 @@
-#import cvxpy as cp
 import math
 
 import numpy as np
@@ -906,7 +905,7 @@ def plot_results(missing_err_nb, missing_err_lr, missing_err_ours, lr_err, featu
 
 
 def load_mnist_5v3():
-    folder = "./data/binaryizedMNIST-3-5/"
+    folder = "../data/binaryizedMNIST-3-5/"
 
     X_train = pd.read_csv(folder + "train-3-5-images.txt").values
     y_train = pd.read_csv(folder + "train-3-5-labels.txt").values.ravel()
@@ -919,7 +918,7 @@ def load_mnist_5v3():
 
 def load_fashion_binarized():
     
-    folder = "./data/Fashion-0-1/"
+    folder = "../data/Fashion-0-1/"
     
     X_train = pd.read_csv(folder + "train-0-1-images.txt").values
     y_train = pd.read_csv(folder + "train-0-1-labels.txt").values.ravel()
