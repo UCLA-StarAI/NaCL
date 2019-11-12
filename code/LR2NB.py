@@ -110,42 +110,10 @@ class LR2NB(object):
             self.obj *= self.B[i]**(nb)
             self.obj *= self.B_[i]**(nb_)
 
-
-    """
-    Assuming data points are repeated, so X[0] == X[1]
-    But Y[0] = P(Y= 0 | X[0]), Y[1] = P(Y=1 | X[1])
-    """
-    def setObjEM(self, X, Y, divider = 1.0, c = 1.0):
-        N = len(Y) // 2
-        sum_1 = np.sum([Y[i] for i in range(1, 2*N, 2)])
-        sum_2 = np.sum([Y[i] for i in range(0, 2*N, 2)])
-        n_t = (sum_1 + c) / divider 
-        n_f = (sum_2 + c) / divider   
-
-        self.obj = self.p**(n_t ) * self.p_**(n_f)
-        #self.obj = self.A[0]
-
-        for i in range(self.N):
-            na  = (c + np.sum( [Y[j] if X[j][i] == 1 else 0  for j in range(1, 2*N, 2)] )) /divider
-            na_ = (c + np.sum( [Y[j] if X[j][i] == 0 else 0  for j in range(1, 2*N, 2)] )) /divider
-            nb  = (c + np.sum( [Y[j] if X[j][i] == 1 else 0  for j in range(0, 2*N, 2)] )) /divider 
-            nb_ = (c + np.sum( [Y[j] if X[j][i] == 0 else 0  for j in range(0, 2*N, 2)] )) /divider 
-
-            if i == 25:
-                print( (na, na_, nb, nb_) )
-
-            self.obj *= self.A[i]**(na)
-            self.obj *= self.A_[i]**(na_) 
-            self.obj *= self.B[i]**(nb)
-            self.obj *= self.B_[i]**(nb_) 
                 
-
     # Assuming everything is already set-up
     def solve(self, verbose = False, parallel=False):
         self.problem = cp.Problem(cp.Maximize(self.obj), self.constraints)
-        
-        # print(self.problem)
-        
         assert not self.problem.is_dcp()
         assert self.problem.is_dgp()
 
@@ -159,7 +127,6 @@ class LR2NB(object):
 
 
     def __validate_relaxed_sums__(self, EPS = 1e-6):
-        # TODO add relaxed sum for marginals if they are added
         if math.fabs(self.p.value + self.p_.value - 1) > EPS:
             return False
         for i in range(self.N):
@@ -169,13 +136,6 @@ class LR2NB(object):
                 return False
 
         return True
-
-
-    def print_relaxed_sums(self):
-        # TODO add relaxed sum for marginals if they are added
-        print ( self.p.value + self.p_.value )
-        for i in range(self.N):
-            print( (self.A[i].value + self.A_[i].value, self.B[i].value + self.B_[i].value) ) 
 
 
     def solved_logistic_weights(self):

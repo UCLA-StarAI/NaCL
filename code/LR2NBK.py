@@ -94,13 +94,6 @@ class LR2NBK(object):
         #     self.problem.solve(solver=cp.SCS, gp = True, verbose = verbose, parallel = parallel)
 
 
-    def __validate_relaxed_sums__(self, EPS = 1e-6):
-        pass
-
-    def print_relaxed_sums(self):
-        pass
-
-
     def classify(self, X, missing = None, prob = False, EPS = 1e-14):
         result = np.zeros( (len(X), self.K) )
         sum = np.zeros( len(X) )
@@ -126,25 +119,3 @@ class LR2NBK(object):
             return result
         else:
             return np.argmax(result, axis=1)
-
-    # def prob_x_given_c(self, X, c, eps = 1e-8):
-    #     datas = X.shape[0]
-    #     result = np.zeros(datas)
-    #     if c == 1:
-    #         for d in range(datas):
-    #             for i in range(self.N):
-    #                 if X[d][i] == 1:
-    #                     result[d] += np.log(self.A[i].value + eps)
-    #                 else:
-    #                     result[d] += np.log(self.A_[i].value + eps)
-
-    #     else:
-    #         for d in range(datas):
-    #             for i in range(self.N):
-    #                 if X[d][i] == 1:
-    #                     result[d] += np.log(self.B[i].value + eps)
-    #                 else:
-    #                     result[d] += np.log(self.B_[i].value + eps)
-
-
-    #     return np.exp(result)

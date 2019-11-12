@@ -54,14 +54,12 @@ class LR2NBK(object):
         
         for k in range(1, self.K):
             for i in range(self.N):       
-                # should use W[i+1] since A[0] coressponds to W[1]..
+                # should use W[.][i+1] since A[0] coressponds to W[.][1]
                 temp = math.exp(self.W[k][i+1] - self.W[0][i+1] + EPS)
                 temp *= self.A[k][i]**(-1)
                 temp *= self.A_[k][i] * self.A[0][i] * self.A_[0][i]**(-1)
 
                 self.constraints.append( temp  == 1 )
-                #self.constraints.append( temp  <= 1 )
-                #self.constraints.append( temp  >= 1 )
 
 
         for k in range(1, self.K):  
@@ -70,8 +68,6 @@ class LR2NBK(object):
                 Ck *= self.A_[k][i]**(-1) * self.A_[0][i]
     
             self.constraints.append( Ck == 1 )
-            #self.constraints.append( Ck <= 1 )  
-            #self.constraints.append( Ck >= 1 )  
     
 
     def setObj(self, X, Y, divider = 1.0, c = 1.0):
@@ -94,27 +90,6 @@ class LR2NBK(object):
 
                 self.obj *= self.A[k][i]**(na)
                 self.obj *= self.A_[k][i]**(na_) 
-
-    def setObjEM(self, X, Y, divider = 1.0, c = 1.0):
-        self.__init_vars__()
-        self.__init_constraints__(EM = False)
-
-        divider *= Y.shape[0]
-
-        n_p = -1 * (np.sum(Y, axis = 0) + c) / divider
-
-        self.obj = 1
-        for k in range(self.K):
-            self.obj *= self.p[k]**(n_p[k])
-
-        for i in range(self.N):
-            nak  = -1 * (np.sum( Y[X[:, i] == 1], axis = 0) + c) / divider
-            nak_ = -1 * (np.sum( Y[X[:, i] == 0], axis = 0) + c) / divider
-
-            for k in range(self.K):
-                self.obj *= self.A[k][i]**(nak[k])
-                self.obj *= self.A_[k][i]**(nak_[k])
-
                 
     # Assuming everything is already set-up
     def solve(self, solver = 'mosek_cli', verbose = False):
@@ -141,12 +116,6 @@ class LR2NBK(object):
         self.W, self.N, self.K, self._P, self._AKI, self._A_KI = myTuple
         self._ready_()
 
-    def __validate_relaxed_sums__(self, EPS = 1e-6):
-        pass
-        
-    def print_relaxed_sums(self):
-        pass
-
     def PK(self, k):
         return self._P[k]
     
@@ -155,7 +124,6 @@ class LR2NBK(object):
 
     def A_KI(self, k, i):
         return self._A_KI[i][k]
-
 
     def classify(self, X, missing = None, prob = False, EPS = 1e-14):
         return self.classify_fast(X, missing, prob=prob)

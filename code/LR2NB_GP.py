@@ -38,7 +38,7 @@ class LR2NB(object):
             self.constraints.append(self.A[i] + self.A_[i] <= 1 )
             self.constraints.append(self.B[i] + self.B_[i] <= 1 )   
             
-            # should use W[i+1] since A[0] coressponds to W[1]..
+            # should use W[i+1] since A[0] coressponds to W[1]
             self.constraints.append( math.exp(self.W[i+1]) * self.A[i]**(-1) * \
                 self.A_[i] * self.B[i] * self.B_[i]**(-1) == 1 )
             
