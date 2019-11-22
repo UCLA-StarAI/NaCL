@@ -383,6 +383,8 @@ def run_experiment_k_paper(X_test, y_test, clf, NB, a, setting):
     do_miceImpute = setting["miceImpute"] if "miceImpute" in setting else False
     do_knnImpute = setting["knnImpute"] if "knnImpute" in setting else False
 
+    verbose = setting["verbose"] if "verbose" in setting else True
+
     if useEM:
         missing_err_ours_all = {}
         for i in range(len(a)):
@@ -398,8 +400,9 @@ def run_experiment_k_paper(X_test, y_test, clf, NB, a, setting):
         else:
             function = f1_score
 
-    print("Using following function: ")
-    print(function)
+    if verbose:
+        print("Using following function: ")
+        print(function)
     
     repeat = setting["repeat"] if "repeat" in setting else 1
 
@@ -412,12 +415,14 @@ def run_experiment_k_paper(X_test, y_test, clf, NB, a, setting):
     else:
         FEATURES = np.array( FEATURES )
 
-    print("Possible features to remove: {}".format(FEATURES.shape[0]))
+    if verbose:
+        print("Possible features to remove: {}".format(FEATURES.shape[0]))
 
     K = setting["k"]
 
     for k in K:
-        print("K = {}".format(k))
+        if verbose:
+            print("K = {}".format(k))
 
         if k > FEATURES.shape[0]:
             print("Early stop: Only had {} features possible to remove".format(FEATURES.shape[0]))
@@ -441,10 +446,10 @@ def run_experiment_k_paper(X_test, y_test, clf, NB, a, setting):
             cur_ours = []
         
         
-
         for R in range(repeat):
             if R % 10 == 0:
-                print("\t R = {}".format(R))
+                if verbose:
+                    print("\t R = {}".format(R))
             X_test_mean   = np.array(X_test, dtype = 'float')
             X_test_median = np.array(X_test, dtype = 'float')
             X_test_max    = np.array(X_test, dtype = 'float')
