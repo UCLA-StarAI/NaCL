@@ -152,6 +152,9 @@ class LR2NBK(object):
         else:
             return np.argmax(result, axis=1)
 
+    def predict_proba(self, X, missing = None):
+        return self.classify(X, missing = missing, prob = True)
+
     def classify_fast(self, X, missing = None, prob = False):
         mX = X
         mX_ = 1 - X

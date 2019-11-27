@@ -132,6 +132,9 @@ class LR2NB(object):
             yHat = np.array([int(yHatz[i][0]) for i in range(yHatz.shape[0])]).reshape(1, -1)
             return yHat
 
+    def predict_proba(self, X, missing = None):
+        return self.classify(X, missing = missing, prob = True)
+
     def prob_x_given_c(self, X, eps = 1e-8):
         mX = X
         mX_ = 1 - X
