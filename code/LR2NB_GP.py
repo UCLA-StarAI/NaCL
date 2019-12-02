@@ -78,7 +78,6 @@ class LR2NB(object):
             self.model = gp.Model(self.obj, self.constraints)    
             self.solution = self.model.solve(verbosity = verbose, solver=solver)
             
-
             sol = self.solution['freevariables']
 
             self._p = sol["p"]

@@ -6,18 +6,24 @@ Given a logistic regression (LR) model, NaCL learns a Naive Bayes model that con
 
 # Requirements
 
-You can use requirements.txt to initialize a python virtual environment. Then, you can add that environment as a kernel to the ipython notebooks. The alternative is to install each requirement individually. 
+- Python 2  (due to GPkit, the main library we used to solve the geometric programs).
 
-GPkit, the library we use to solve the geometric programs requires python 2 version.
+- You can use requirements.txt to initialize a python virtual environment. Then, you can add that environment as a kernel to the ipython notebooks. The alternative is to install each requirement individually. 
 
-# Usage
+- Additionally, we use "[Mosek](https://gpkit.readthedocs.io/en/latest/installation.html)" as our backend-solver which is much faster than the default solver (cvxopt). If you do not have Mosek installed simply remove `solver = 'mosek_cli'` to use cvxopt. However, we highly recommented using Mosek as its much faster and more stable.
 
-For examples of how to run the code, please refer to the notebooks folder. Additionally, we have provided some pretrained models in the pretrained folders. You can use those to repeat the experiments in the paper. 
 
-Our notebooks use "[Mosek](https://gpkit.readthedocs.io/en/latest/installation.html)" solver which is faster than the default solver (cvxopt) that comes with GPKit. If you do not have Mosek installed simply remove `solver = 'mosek_cli'` to use cvxopt.
+# Demo
+For a demo of the NaCL algorithm on how to handle missing features and its performance please refer to the [demo notebook](./notebooks/demo.ipynb).
+
+# Experimental Results
+
+Under the notebooks folder, we have more examples that can be used to reproduce results from the paper. For each dataset used in the paper we have a notebook that runs the experiments for that dataset and generates the results. 
+
+Additionally, we have provided some pretrained models in the pretrained folder. 
 
 # Runtime
 
-Empirically, the runtime for the solver seems to grow quadratically with number of features and classes. On MNIST and Fashion datasets (with 784 features and 10 classes) the solver we used takes between 20-30min to train.
+Empirically, the runtime for the solver seems to grow quadratically with number of features and classes. On MNIST and Fashion datasets (with 784 features and 10 classes) the solver we used takes between 20-30min to train. On the other datasets used in the paper, NaCL took few seconds to train.
 
-We included implementation of NaCL in two Geometric Programming libraries. For best performance, we recommend using the GPKit version (the python files ending with "_GP") with Mosek backend. The ipython notebook examples use the GPKit version.
+We have included implementation of NaCL using cvxpy and GPKit libraries. For best performance, we recommend using the GPKit version (the python files ending with "_GP") with Mosek backend. The ipython notebook examples use the GPKit+Mosek configuration.
