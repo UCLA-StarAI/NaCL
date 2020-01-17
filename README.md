@@ -6,11 +6,15 @@ Given a logistic regression (LR) model, NaCL learns a Naive Bayes model that con
 
 # Requirements
 
-- Python 2  (due to GPkit, the main library we used to solve the geometric programs).
+- Python 2.7  (due to GPkit, the main library we used to solve the geometric programs).
 
 - You can use requirements.txt to initialize a python virtual environment. Then, you can add that environment as a kernel to the ipython notebooks. The alternative is to install each requirement individually. 
 
 - Additionally, we use "[Mosek](https://gpkit.readthedocs.io/en/latest/installation.html)" as our backend-solver which is much faster than the default solver (cvxopt). If you do not have Mosek installed simply remove `solver = 'mosek_cli'` to use cvxopt. However, we highly recommented using Mosek as its much faster and more stable.
+
+  - There is two options to use Mosek solver in GPKIT, "mosek" or "mosek_cli". If you use "mosek_cli", GPKIT uses command line interface to call Mosek, more specifically I think it runs `mskexpopt`. More details [here](https://gpkit.readthedocs.io/en/latest/autodoc/gpkit.html). 
+  - It seems GPKit might have issues with some versions of Mosek, the version used for this project is "Mosek - 8.1.0.75". For other versions, if you ran into issues trying [this](https://github.com/convexengineering/gpkit/issues/1442) might help.
+
 
 
 # Demo
