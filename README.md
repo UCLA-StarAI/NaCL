@@ -1,4 +1,4 @@
-# NaCL
+# NaCL: Naive Conformant Learning
 Code and experiments for the paper "[What to Expect of Classifiers? Reasoning about Logistic Regression with Missing Features](http://starai.cs.ucla.edu/papers/KhosraviIJCAI19.pdf)", published in IJCAI 2019. 
 
 Given a logistic regression (LR) model, NaCL learns a Naive Bayes model that conforms with the LR model (if used as a classifier gives out exactly same class conditional probabilities) and at the same time maximizes the joint feature likelihood P(X) on the dataset. Then, the expected prediction of the NaCL model can be used as a way of handling missing features. NaCL's learned model conforms to the original LR model, so it keeps the accuracy of the LR model when no features are missing. At the same time, it outperforms common imputation techniques in handling missing features during test time by computing expected predictions. 
