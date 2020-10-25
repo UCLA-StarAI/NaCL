@@ -7,7 +7,7 @@ import sys
 import pandas as pd
 import pickle
 from sklearn.metrics import f1_score 
-import impyute
+
 
 def save(file, obj):
     with open(file,'wb') as outfile: 
@@ -357,6 +357,8 @@ def run_experiment_paper(X_test, y_test, clf, NB, a, setting):
 
 
 def run_experiment_k_paper(X_test, y_test, clf, NB, a, setting):
+    import impyute
+    
     X_impute_mean   = np.mean(X_test, axis = 0)
     X_impute_median = np.median(X_test, axis = 0)
     X_impute_max    = np.max(X_test, axis = 0)
@@ -411,7 +413,7 @@ def run_experiment_k_paper(X_test, y_test, clf, NB, a, setting):
         NNN = X_test.shape[1]
         if not featureEncoding is None:
             NNN = len(featureEncoding)
-        FEATURES = np.array( [i for i in range(NNN / discreteFeatures )] )
+        FEATURES = np.array( [i for i in range(int(NNN / discreteFeatures))] )
     else:
         FEATURES = np.array( FEATURES )
 
@@ -935,11 +937,11 @@ def load_fashion_binarized():
 
 def load_dataset(folder, label):
         
-    X_train = pd.read_csv("../data/" + folder + "/train-" + label + "-samples.txt").values
-    y_train = pd.read_csv("../data/" + folder + "/train-" + label + "-labels.txt").values.ravel()
+    X_train = pd.read_csv("data/" + folder + "/train-" + label + "-samples.txt").values
+    y_train = pd.read_csv("data/" + folder + "/train-" + label + "-labels.txt").values.ravel()
 
-    X_test = pd.read_csv("../data/" + folder + "/test-" + label + "-samples.txt").values
-    y_test = pd.read_csv("../data/" + folder + "/test-" + label + "-labels.txt").values.ravel()
+    X_test = pd.read_csv("data/" + folder + "/test-" + label + "-samples.txt").values
+    y_test = pd.read_csv("data/" + folder + "/test-" + label + "-labels.txt").values.ravel()
     
     return X_train, y_train, X_test, y_test
 

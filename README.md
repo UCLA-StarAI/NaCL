@@ -1,23 +1,60 @@
+
+# Note
+
+This branch is WIP refactoring of moving to python 3. The old environment I used does not work anymore and not supported by GPKit. Some experiment code may be removed for official code for the paper checkout the master branch. However, this should be easier to use.
+
+Main code is now under `./src`. The examples in the `./examples` folder have been ported to new code, notebooks are yet to be ported. Some functions under `src/util.py` have not been ported yet (the ones related to running the experiment).
+
+
 # NaCL: Naive Conformant Learning
-Code and experiments for the paper "[What to Expect of Classifiers? Reasoning about Logistic Regression with Missing Features](http://starai.cs.ucla.edu/papers/KhosraviIJCAI19.pdf)", published in IJCAI 2019. 
+Code the paper "[What to Expect of Classifiers? Reasoning about Logistic Regression with Missing Features](http://starai.cs.ucla.edu/papers/KhosraviIJCAI19.pdf)", published in IJCAI 2019.
 
-Given a logistic regression (LR) model, NaCL learns a Naive Bayes model that conforms with the LR model (if used as a classifier gives out exactly same class conditional probabilities) and at the same time maximizes the joint feature likelihood P(X) on the dataset. Then, the expected prediction of the NaCL model can be used as a way of handling missing features. NaCL's learned model conforms to the original LR model, so it keeps the accuracy of the LR model when no features are missing. At the same time, it outperforms common imputation techniques in handling missing features during test time by computing expected predictions. 
-
+Given a logistic regression (LR) model, NaCL learns a Naive Bayes model that conforms with the LR model (if used as a classifier gives out exactly same class conditional probabilities) and at the same time maximizes the joint feature likelihood P(X) on the dataset. Then, the expected prediction of the NaCL model can be used as a way of handling missing features. NaCL's learned model conforms to the original LR model, so it keeps the accuracy of the LR model when no features are missing. At the same time, it outperforms common imputation techniques in handling missing features during test time by computing expected predictions.
 
 # Requirements
 
-- Python 2.7  (due to GPkit, the main library we used to solve the geometric programs).
+- Python3, GPkit v0.9.9
 
-- You can use requirements.txt to initialize a python virtual environment. Then, you can add that environment as a kernel to the ipython notebooks. The alternative is to install each requirement individually. 
+- You can use requirements.txt to initialize a python virtual environment. Then, you can add that environment as a kernel to the ipython notebooks. The alternative is to install each requirement individually.
 
-- Additionally, we use "[Mosek](https://gpkit.readthedocs.io/en/latest/installation.html)" as our backend-solver which is much faster than the default solver (cvxopt). If you do not have Mosek installed simply remove `solver = 'mosek_cli'` to use cvxopt. However, we highly recommented using Mosek as its much faster and more stable.
+```bash
+virtualenv -p python3 venv
+source venv/bin/activate
+pip3 install -r requirements.txt
+```
 
-  - There is two options to use Mosek solver in GPKIT, "mosek" or "mosek_cli". If you use "mosek_cli", GPKIT uses command line interface to call Mosek, more specifically I think it runs `mskexpopt`. More details [here](https://gpkit.readthedocs.io/en/latest/autodoc/gpkit.html). 
-  - It seems GPKit might have issues with some versions of Mosek, the version used for this project is "Mosek - 8.1.0.75". For other versions, if you ran into issues trying [this](https://github.com/convexengineering/gpkit/issues/1442) might help.
+- Additionally, we use "[Mosek 9.2.28](https://gpkit.readthedocs.io/en/latest/installation.html)" as our backend-solver which is much faster than the default solver (cvxopt). If you do not have Mosek installed simply remove the default is to use cvxopt. However, we highly recommented using Mosek as its much faster and more stable. You can do that by setting `solver = 'mosek_cli'` or `solver = 'mosek_conif'`. (I belive the second options is prefered for the version of GPKit and Mosek that I tried)
+
+The following script installs the mentioned mosek in your home directory. 
+```bash
+wget https://download.mosek.com/stable/9.2.28/mosektoolslinux64x86.tar.bz2
+tar -xvf mosektoolslinux64x86.tar.bz2 -C ~
+export PATH=$PATH:$HOME/mosek/9.2/tools/platform/linux64x86/bin
+```
+
+Also need to request a license from Mosek (its free for academic usecases), and copy it to `~/mosek/mosek.lic`. Also consider adding the `export PATH...` into your `.bashrc`.
 
 
+If you install Mosek after you install GPkit you need to build it again. Or uninstall and install gpkit again.
 
-# Demo
+```bash
+python -c "from gpkit.build import build; build()"
+```
+
+Make sure to double check latest instruction at GPKit and Mosek.
+
+# Examples
+You can run the examples as follows (here --remove is used to remove some pixels around the picture to make optimization go faster and for benchmarking purposes. If you want all pixels don't add the argument, for mnist or fashion it should take about 20-30min and you might run out of memory). The main bottleneck is number of features. Having more data it should scale linearly but scales quadratically for more features, classes.
+
+```bash
+python3 examples/fashion.py --remove 8
+
+python3 examples/mnist.py --remove 8
+
+python3 examples/splice.py
+```
+
+# Notebook Demos
 For a demo of the NaCL algorithm on how to handle missing features and its performance please refer to the [demo notebook](./notebooks/demo.ipynb).
 
 # Experimental Results
