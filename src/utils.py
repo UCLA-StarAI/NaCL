@@ -649,25 +649,3 @@ def load_dataset(folder, label):
     y_test = pd.read_csv(folder + "/test-" + label + "-labels.txt").values.ravel()
     
     return X_train, y_train, X_test, y_test
-
-def load_digits_binarized():
-    from sklearn.datasets import load_digits
-    digits = load_digits()
-
-    # Binarize
-    X = digits.images
-    X[ X < 8 ] = 0
-    X[ X >=8 ] = 1
-
-    # only to detect 0 vs non-zero for now
-    Y = digits.target
-    zeros = (Y == 0)
-    non_zeros = (Y != 0)
-    Y[ zeros] = 1
-    Y[ non_zeros ] = 0
-    X = np.array(X)
-    Y = np.array(Y)
-    X = X.reshape(X.shape[0], X.shape[1] * X.shape[2])
-    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.33)
-
-    return X_train, y_train, X_test, y_test
