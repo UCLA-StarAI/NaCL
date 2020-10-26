@@ -18,7 +18,7 @@ Given a logistic regression (LR) model, NaCL learns a Naive Bayes model that con
 - You can use requirements.txt to initialize a python virtual environment. Then, you can add that environment as a kernel to the ipython notebooks. The alternative is to install each requirement individually.
 
 ```bash
-virtualenv -p python3 venv
+python3 -m venv venv
 source venv/bin/activate
 pip3 install -r requirements.txt
 ```
