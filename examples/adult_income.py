@@ -11,7 +11,7 @@ from NaCL import NaCL2
 
 sys.setrecursionlimit(2000000)
 
-X_train, y_train, X_test, y_test = utils.load_dataset("adult_income", "adult")
+X_train, y_train, X_test, y_test = utils.load_dataset("./data/adult_income", "adult")
 print("X_train.shape = {}".format(X_train.shape))
 print("X_test.shape = {}".format(X_test.shape))
 

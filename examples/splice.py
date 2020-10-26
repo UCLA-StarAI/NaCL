@@ -11,7 +11,7 @@ from NaCL import NaCLK
 
 sys.setrecursionlimit(2000000)
 
-X_train, y_train, X_test, y_test = utils.load_dataset("splice", "splice")
+X_train, y_train, X_test, y_test = utils.load_dataset("./data/splice", "splice")
 print("X_train.shape = {}".format(X_train.shape))
 print("X_test.shape = {}".format(X_test.shape))
 

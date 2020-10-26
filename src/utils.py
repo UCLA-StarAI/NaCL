@@ -121,7 +121,6 @@ def predict_with_missing(X2_test, NB, missing, prob = False, eps=1e-8):
     else:
         return sigmoid(-Yhat3)
 
-
 def run_experiment(X_impute, X_test, y_test, clf, NB, a, repeat = 1, k_jump=10, K = None, FEATURES = None, return_all = False, use_clasffier_as_truth = False, use_cross_entropy = False, use_f1 = False):
     """
     X_impute: What value to impute for each missing features
@@ -222,141 +221,7 @@ def run_experiment(X_impute, X_test, y_test, clf, NB, a, repeat = 1, k_jump=10, 
         return k_all, missing_err_nb_all, missing_err_lr_all, missing_err_ours_all
 
 
-def run_experiment_paper(X_test, y_test, clf, NB, a, setting):
-    X_impute_mean   = np.mean(X_test, axis = 0)
-    X_impute_median = np.median(X_test, axis = 0)
-    X_impute_max    = np.max(X_test, axis = 0)
-    X_impute_min    = np.min(X_test, axis = 0)
-
-    k_all = []
-    missing_err_nb_all = []
-    missing_err_lr_mean_all = []
-    missing_err_lr_median_all = []
-    missing_err_lr_max_all = []
-    missing_err_lr_min_all = []
-    missing_err_ours_all = []
-
-    useEM = setting["em"] if "em" in setting else False
-    discreteFeatures = setting["discreteFeatures"] if "discreteFeatures" in setting else 1
-
-    useProb = setting["prob"] if "prob" in setting else True
-    function = setting["function"] if "function" in setting else None
-    if function is None:
-        if useProb:
-            function = cross_entropy
-        else:
-            function = f1_score
-
-    print("Using following function: ")
-    print(function)
-    
-    repeat = setting["repeat"] if "repeat" in setting else 1
-
-    FEATURES = setting["features"] if "features" in setting else None
-    if FEATURES is None:
-        FEATURES = np.array( [i*discreteFeatures for i in range(X_test.shape[1])] )
-    else:
-        FEATURES = np.array( FEATURES )
-
-    print("Possible features to remove: {}".format(FEATURES.shape[0]))
-
-    K = setting["k"]
-
-    for k in K:
-        print("K = {}".format(k))
-
-        if k > FEATURES.shape[0]:
-            print("Early stop: Only had {} features possible to remove".format(FEATURES.shape[0]))
-            break
-
-        cur_nb = []
-        cur_lr_mean = []
-        cur_lr_median = []
-        cur_lr_max = []
-        cur_lr_min = []
-        cur_ours = []
-
-        for R in range(repeat):
-            print("\t R = {}".format(R))
-            X_test_mean   = np.array(X_test, dtype = 'float')
-            X_test_median = np.array(X_test, dtype = 'float')
-            X_test_max    = np.array(X_test, dtype = 'float')
-            X_test_min    = np.array(X_test, dtype = 'float')
-            missing = np.zeros(X_test.shape, dtype=bool)
-            
-            for i in range(X_test.shape[0]):
-                miss = np.random.choice(FEATURES, k, replace=False)
-
-                if discreteFeatures != 1:
-                    missK =[]
-                    for m in miss:
-                        for i in range(discreteFeatures):
-                            missK.append(m + i)
-
-                    miss = np.array(missK)
-
-                missing[i][miss] = True
-                X_test_mean[i][miss]   = X_impute_mean[miss]
-                X_test_median[i][miss] = X_impute_median[miss]
-                X_test_max[i][miss]    = X_impute_max[miss]
-                X_test_min[i][miss]    = X_impute_min[miss]
-
-            
-            lr_prob = clf.predict_proba(X_test)[:,1]
-            
-            if useProb:
-                cur_nb.append         ( function(lr_prob, predict_with_missing(X_test_mean, NB, missing, prob = True)) )
-                cur_lr_mean.append    ( function(lr_prob, clf.predict_proba(X_test_mean)[:,1]) )
-                cur_lr_median.append  ( function(lr_prob, clf.predict_proba(X_test_median)[:,1]))
-                cur_lr_max.append     ( function(lr_prob, clf.predict_proba(X_test_max)[:,1]))
-                cur_lr_min.append     ( function(lr_prob, clf.predict_proba(X_test_min)[:,1]))
-                if not useEM:
-                    cur_ours.append   ( function(lr_prob, a.odd(X_test_mean, missing, prob = True)))
-                else:
-                    op = []
-                    for z in range(len(a)):
-                        op.append (function(lr_prob, a[z].odd(X_test_mean, missing, prob = True)))
-                    cur_ours.append(op)
-
-            else:
-                cur_nb.append         ( function(y_test, predict_with_missing(X_test_mean, NB, missing)) )
-                cur_lr_mean.append    ( function(y_test, clf.predict(X_test_mean)) )
-                cur_lr_median.append  ( function(y_test, clf.predict(X_test_median)))
-                cur_lr_max.append     ( function(y_test, clf.predict(X_test_max)))
-                cur_lr_min.append     ( function(y_test, clf.predict(X_test_min)))
-                if not useEM:
-                    cur_ours.append   ( function(y_test, a.classify(X_test_mean, missing)))
-                else:
-                    op = []
-                    for z in range(len(a)):
-                        op.append     ( function(y_test, a.classify(X_test_mean, missing)))                        
-                    cur_ours.append(op)
-
-
-        
-        k_all.append(k)
-        missing_err_nb_all.append       (cur_nb)
-        missing_err_lr_mean_all.append  (cur_lr_mean)
-        missing_err_lr_median_all.append(cur_lr_median)
-        missing_err_lr_max_all.append   (cur_lr_max)
-        missing_err_lr_min_all.append   (cur_lr_min)
-        missing_err_ours_all.append     (cur_ours)
-
-    data = {
-        "k" :     np.array(k_all),
-        "nb":     np.array(missing_err_nb_all),
-        "mean":   np.array(missing_err_lr_mean_all),
-        "median": np.array(missing_err_lr_median_all),
-        "max":    np.array(missing_err_lr_max_all),
-        "min":    np.array(missing_err_lr_min_all),
-        "ours":   np.array(missing_err_ours_all)
-    }            
-
-    return data
-
-
-
-def run_experiment_k_paper(X_test, y_test, clf, NB, a, setting):
+def run_experiment_k_paper(X_test, y_test, clf, NB, nacl, setting):
     import impyute
     
     X_impute_mean   = np.mean(X_test, axis = 0)
@@ -377,7 +242,6 @@ def run_experiment_k_paper(X_test, y_test, clf, NB, a, setting):
     missing_err_lr_mice_impute_all = []
     missing_err_lr_knn_impute_all = []
 
-    useEM = setting["em"] if "em" in setting else False
     discreteFeatures = setting["discreteFeatures"] if "discreteFeatures" in setting else 1
     featureEncoding = setting["feature_encoding"] if "feature_encoding" in setting else None
 
@@ -387,12 +251,7 @@ def run_experiment_k_paper(X_test, y_test, clf, NB, a, setting):
 
     verbose = setting["verbose"] if "verbose" in setting else True
 
-    if useEM:
-        missing_err_ours_all = {}
-        for i in range(len(a)):
-            missing_err_ours_all["ours_" + str(i)] = []
-    else:
-        missing_err_ours_all = []
+    missing_err_ours_all = []
 
     useProb = setting["prob"] if "prob" in setting else True
     function = setting["function"] if "function" in setting else None
@@ -440,13 +299,8 @@ def run_experiment_k_paper(X_test, y_test, clf, NB, a, setting):
         cur_mice_impute = []
         cur_knn_impute = []
 
-        if useEM:
-            cur_ours = {}
-            for i in range(len(a)):
-                cur_ours["ours_" + str(i)] = []
-        else:
-            cur_ours = []
-        
+      
+        cur_ours = []
         
         for R in range(repeat):
             if R % 10 == 0:
@@ -481,9 +335,6 @@ def run_experiment_k_paper(X_test, y_test, clf, NB, a, setting):
 
                    
                 missing[i][miss] = True
-                # if k > 0:
-                #     print(missing[i])
-                #     print(np.sum(missing[i]))
                 X_test_mean[i][miss]   = X_impute_mean[miss]
                 X_test_median[i][miss] = X_impute_median[miss]
                 X_test_max[i][miss]    = X_impute_max[miss]
@@ -535,14 +386,8 @@ def run_experiment_k_paper(X_test, y_test, clf, NB, a, setting):
                 cur_lr_min.append     ( function(lr_prob, clf.predict_proba(X_test_min)))
                 cur_em_impute.append  ( function(lr_prob, clf.predict_proba(X_test_em_impute)))
                 cur_mice_impute.append( function(lr_prob, clf.predict_proba(X_test_mice_impute)))
-                cur_knn_impute.append ( function(lr_prob, clf.predict_proba(X_test_knn_impute)))
-                # cur_flip.append       ( function(lr_prob, clf.predict_proba(X_test_flip)))
-                if not useEM:
-                    cur_ours.append   ( function(lr_prob, a.classify(X_test, missing, prob = True)))
-                else:
-                    for z in range(len(a)):
-                        cur_ours["ours_" + str(z)].append (function(lr_prob, a[z].classify(X_test, missing, prob = True)))
-                        
+                cur_knn_impute.append ( function(lr_prob, clf.predict_proba(X_test_knn_impute)))    
+                cur_ours.append       ( function(lr_prob, nacl.predict_proba(X_test, missing)))        
 
             else:
                 cur_nb.append         ( function(y_test, predict_nbk_with_missing(X_test_mean, NB, missing)) )
@@ -553,12 +398,8 @@ def run_experiment_k_paper(X_test, y_test, clf, NB, a, setting):
                 cur_em_impute.append  ( function(y_test, clf.predict(X_test_em_impute)))
                 cur_mice_impute.append( function(y_test, clf.predict(X_test_mice_impute)))
                 cur_knn_impute.append( function(y_test, clf.predict(X_test_knn_impute)))
-                # cur_flip.append       ( function(y_test, clf.predict(X_test_flip)))
-                if not useEM:
-                    cur_ours.append   ( function(y_test, a.classify(X_test_mean, missing)))
-                else:
-                    for z in range(len(a)):
-                        cur_ours["ours_" + str(z)].append( function(y_test, a[z].classify(X_test_mean, missing)))
+                cur_ours.append   ( function(y_test, nacl.predict(X_test_mean, missing)))
+                
         
         k_all.append(k)
         missing_err_nb_all.append       (cur_nb)
@@ -570,14 +411,12 @@ def run_experiment_k_paper(X_test, y_test, clf, NB, a, setting):
         missing_err_lr_em_impute_all.append(cur_em_impute)
         missing_err_lr_mice_impute_all.append(cur_mice_impute)
         missing_err_lr_knn_impute_all.append(cur_knn_impute)
-        if useEM:
-            for i in cur_ours:
-                missing_err_ours_all[i].append(cur_ours[i])
-        else:
-            missing_err_ours_all.append  (cur_ours)
+        missing_err_ours_all.append  (cur_ours)
 
-    if not useEM:
-        missing_err_ours_all = np.array(missing_err_ours_all)
+    
+    #end of for loops
+    
+    missing_err_ours_all = np.array(missing_err_ours_all)
 
     data = {
         "features_count": FEATURES.shape[0],
@@ -772,145 +611,6 @@ def plot_results_paper(data, setting = {}, show_nb = False):
     plt.savefig(saveAs)
     return plt
 
-
-def run_experiment_likelihood(X_impute, X_test, y_test, clf, NB, a, K, repeat = 1, FEATURES = None, return_all = False):
-    features = X_test.shape[1]   
-    k_all = []
-    missing_err_nb_all = []
-    missing_err_lr_all = []
-    missing_err_ours_all = []
-
-    missing_err_nb = []
-    missing_err_lr = []
-    missing_err_ours = []
-    
-    if FEATURES is None:
-        FEATURES = np.array( [i for i in range(features)] )
-    else:
-         FEATURES = np.array( FEATURES )
-    print("Possible features to remove: {}".format(FEATURES.shape[0]))
-
-  
-    for k in K:
-        print("K = {}".format(k))
-
-        if k > FEATURES.shape[0]:
-            print("Early stop: Only had {} features possible to remove".format(FEATURES.shape[0]))
-            break
-
-        err_nb = 0
-        err_lr = 0
-        err_ours = 0
-
-        for R in range(repeat):
-            X2_test = np.array(X_test, dtype = 'float')
-        
-            missing = np.zeros(X_test.shape, dtype=bool)
-            for i in range(X2_test.shape[0]):
-                miss = np.random.choice(FEATURES, k, replace=False)
-                missing[i][miss] = True
-                X2_test[i][miss] = X_impute[miss]
-
-            Yhat2 = predict_with_missing(X2_test, NB, missing, prob = True)
-            clf_prob = clf.predict_proba(X2_test)[:,1]
-            a_prob = a.odd(X2_test, missing, prob = True)
-
-            A_nb = log_likelihood(Yhat2, y_test)
-            A_clf = log_likelihood(clf_prob, y_test)
-            A_a = log_likelihood(a_prob, y_test)
-
-            k_all.append(k)
-            missing_err_nb_all.append(A_nb)
-            missing_err_lr_all.append(A_clf)
-            missing_err_ours_all.append(A_a)
-            
-            err_nb +=  A_nb
-            err_lr += A_clf
-            err_ours += A_a
-
-        missing_err_nb.append( err_nb/repeat )
-        missing_err_lr.append( err_lr/repeat )
-        missing_err_ours.append( err_ours/repeat )
-
-    if not return_all:
-        return missing_err_nb, missing_err_lr, missing_err_ours
-    else:
-        return k_all, missing_err_nb_all, missing_err_lr_all, missing_err_ours_all
-
-
-def scatter_plot_results(missing_err_nb, missing_err_lr, missing_err_ours, K, style=None, lines = False, poly_deg = 1, show_nb = True):
-    import matplotlib.pyplot as plt 
-    if not style is None:
-        plt.style.use(style)
-
-    font = {'size'   : 15}
-    plt.rc('font', **font)
-
-    plt.figure(figsize=(8,4.5))
-    if show_nb:
-        plt.scatter(K, missing_err_nb, label = "Direct Naive Bayes", s=10)
-        if lines:
-            plt.plot(np.unique(K), np.poly1d(np.polyfit(K, missing_err_nb, poly_deg))(np.unique(K)), '-.')
-
-    plt.scatter(K, missing_err_lr, label = "LR Mean Imputation", s = 10)
-    if lines:
-        plt.plot(np.unique(K), np.poly1d(np.polyfit(K, missing_err_lr, poly_deg))(np.unique(K)), '--')
-    
-    plt.scatter(K, missing_err_ours, label = "NB Embedded LR", s= 10)
-    if lines:
-        plt.plot(np.unique(K), np.poly1d(np.polyfit(K, missing_err_ours, poly_deg))(np.unique(K)), '-')
-
-    plt.ylabel("Cross Entropy")
-    plt.xlabel("# of Missing features")
-    plt.legend(loc='best')
-    plt.savefig("scatter.eps")
-    return plt
-
-
-def plot_results(missing_err_nb, missing_err_lr, missing_err_ours, lr_err, features, repeat = 1, k_jump = 10, K = None, style=None):
-   
-    import matplotlib.pyplot as plt 
-    if not style is None:
-        plt.style.use(style)
-    initial_err = [lr_err for i in range(features)]
-
-    font = {'size'   : 15}
-
-    plt.rc('font', **font)
-    
-    if K is None:
-        K = [k_jump * i for i in range(len(missing_err_nb))]
-
-    if len(K) > len(missing_err_nb):
-        KK = K[0:len(missing_err_nb)]
-    else:
-        KK = K
-
-    plt.figure(figsize=(8,4.5))
-    
-    # plt.plot(K, missing_err_nb, '-o', markersize=5, label = "Direct NB")
-    # plt.plot(K, missing_err_lr, '-o', markersize=5, label = "LR Mean Imputation")
-    # plt.plot(K, missing_err_ours, '-o', markersize=5, label = "NB -> LR")
-    plt.plot(initial_err, ':', label = "No Missing Features")
-    plt.plot(KK, missing_err_nb, '-.o', markersize=5, label = "Direct Naive Bayes")
-    plt.plot(KK, missing_err_lr, '--s', markersize=5, label = "LR Mean Imputation")
-    plt.plot(KK, missing_err_ours, '-d', markersize=5, label = "LR --> NB")
-
-    plt.ylabel("Accuracy %")
-    plt.xlabel("# of Missing features")
-    
-    plt.legend(loc='best')
-
-    #plt.title("{} Features; {} samples for each K".format(features, repeat))
-
-    plt.title("Binarized MNIST 3 vs 5")
-
-    plt.savefig("mnist.eps")
-    #plt.set_aspect(0.5)
-
-    return plt
-
-
 def load_mnist_5v3():
     folder = "../data/binaryizedMNIST-3-5/"
 
@@ -937,11 +637,11 @@ def load_fashion_binarized():
 
 def load_dataset(folder, label):
         
-    X_train = pd.read_csv("data/" + folder + "/train-" + label + "-samples.txt").values
-    y_train = pd.read_csv("data/" + folder + "/train-" + label + "-labels.txt").values.ravel()
+    X_train = pd.read_csv(folder + "/train-" + label + "-samples.txt").values
+    y_train = pd.read_csv(folder + "/train-" + label + "-labels.txt").values.ravel()
 
-    X_test = pd.read_csv("data/" + folder + "/test-" + label + "-samples.txt").values
-    y_test = pd.read_csv("data/" + folder + "/test-" + label + "-labels.txt").values.ravel()
+    X_test = pd.read_csv(folder + "/test-" + label + "-samples.txt").values
+    y_test = pd.read_csv(folder + "/test-" + label + "-labels.txt").values.ravel()
     
     return X_train, y_train, X_test, y_test
 
