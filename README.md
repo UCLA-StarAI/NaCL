@@ -20,27 +20,30 @@ Given a logistic regression (LR) model, NaCL learns a Naive Bayes model that con
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip3 install -r requirements.txt
+pip3 install -r requirements.txt --user
 ```
 
-- Additionally, we use "[Mosek 9.2.28](https://gpkit.readthedocs.io/en/latest/installation.html)" as our backend-solver which is much faster than the default solver (cvxopt). If you do not have Mosek installed simply remove the default is to use cvxopt. However, we highly recommented using Mosek as its much faster and more stable. You can do that by setting `solver = 'mosek_cli'` or `solver = 'mosek_conif'`. (I belive the second options is prefered for the version of GPKit and Mosek that I tried)
+- Additionally, we use "[Mosek 9.2.28](https://gpkit.readthedocs.io/en/latest/installation.html)" as our backend-solver which is much faster than the default solver (cvxopt). If you do not have Mosek installed simply remove the default is to use cvxopt. However, we highly recommented using Mosek as its much faster and more stable. You can do that by setting `solver = 'mosek_cli'` or `solver = 'mosek_conif'`. 
 
-The following script installs the mentioned mosek in your home directory. 
+The following script installs the mentioned MOSEK9 in your home directory. (for `mosek_conif` you need mosek8)
 ```bash
 wget https://download.mosek.com/stable/9.2.28/mosektoolslinux64x86.tar.bz2
 tar -xvf mosektoolslinux64x86.tar.bz2 -C ~
 export PATH=$PATH:$HOME/mosek/9.2/tools/platform/linux64x86/bin
 ```
 
+Or if you want MOSEK 8 you can. (for `mosek_cli` you need mosek8)
+```bash
+wget https://download.mosek.com/stable/8.1.0.82/mosektoolslinux64x86.tar.bz2
+tar -xvf mosektoolslinux64x86.tar.bz2 -C ~
+export PATH=$PATH:$HOME/mosek/8/tools/platform/linux64x86/bin/
+```
+
+
 Also need to request a license from Mosek (its free for academic usecases), and copy it to `~/mosek/mosek.lic`. Also consider adding the `export PATH...` into your `.bashrc`.
 
 
-If you install Mosek after you install GPkit you need to build it again. Or uninstall and install gpkit again.
-
-```bash
-python -c "from gpkit.build import build; build()"
-```
-
+Note: If you install Mosek after you install GPkit you need might need to uninstall and install gpkit again.
 Make sure to double check latest instruction at GPKit and Mosek.
 
 # Examples
@@ -66,5 +69,3 @@ Additionally, we have provided some pretrained models in the pretrained folder.
 # Runtime
 
 Empirically, the runtime for the solver seems to grow quadratically with number of features and classes. On MNIST and Fashion datasets (with 784 features and 10 classes) the solver we used takes between 20-30min to train. On the other datasets used in the paper, NaCL took few seconds to train.
-
-We have included implementation of NaCL using cvxpy and GPKit libraries. For best performance, we recommend using the GPKit version (the python files ending with "_GP") with Mosek backend. The ipython notebook examples use the GPKit+Mosek configuration.
