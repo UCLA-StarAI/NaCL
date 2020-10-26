@@ -25,7 +25,7 @@ pip3 install -r requirements.txt --user
 
 - Additionally, we use "[Mosek 9.2.28](https://gpkit.readthedocs.io/en/latest/installation.html)" as our backend-solver which is much faster than the default solver (cvxopt). If you do not have Mosek installed simply remove the default is to use cvxopt. However, we highly recommented using Mosek as its much faster and more stable. You can do that by setting `solver = 'mosek_cli'` or `solver = 'mosek_conif'`. 
 
-The following script installs the mentioned MOSEK9 in your home directory. (for `mosek_conif` you need mosek8)
+The following script installs the mentioned MOSEK9 in your home directory. (for `mosek_conif` you need mosek 9)
 ```bash
 wget https://download.mosek.com/stable/9.2.28/mosektoolslinux64x86.tar.bz2
 tar -xvf mosektoolslinux64x86.tar.bz2 -C ~
