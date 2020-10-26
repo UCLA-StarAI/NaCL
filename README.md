@@ -3,7 +3,7 @@
 
 This branch is WIP refactoring of moving to python 3. The old environment I used does not work anymore and not supported by GPKit. Some experiment code may be removed for official code for the paper checkout the master branch. However, this should be easier to use.
 
-Main code is now under `./src`. The examples in the `./examples` folder have been ported to new code, notebooks are yet to be ported. Some functions under `src/util.py` have not been ported yet (the ones related to running the experiment).
+Main code is now under `./src`. The examples in the `./examples` folder have been ported to new code. Some functions under `src/util.py` might not have been ported yet. In the `./notebooks` folder most notebooks are ported and should work now, except the notebook for the explanations that one is still not ported.
 
 
 # NaCL: Naive Conformant Learning
