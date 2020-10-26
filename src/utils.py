@@ -13,9 +13,14 @@ def save(file, obj):
     with open(file,'wb') as outfile: 
          pickle.dump(obj, outfile)
 
-def load(file):
+def load(file, encoding=None):
     with open(file,'rb') as infile: 
-        return pickle.load(infile)
+        if encoding:
+            result = pickle.load(infile, encoding=encoding)
+        else:
+            result = pickle.load(infile)
+
+        return result 
 
 
 def cross_entropy_conditional(p, q, eps = 1e-8):
