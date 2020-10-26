@@ -22,40 +22,6 @@ def load(file, encoding=None):
 
         return result 
 
-
-def cross_entropy_conditional(p, q, eps = 1e-8):
-    return 0 - ( np.sum( p * np.log(q + eps) + (1-p) * np.log(1-q +eps) ) )
-
-def cross_entropy(p, q, eps = 1e-8):
-    return 0 - np.sum( p * np.log(q + eps) )
-
-def kl_divergence(p, q, eps = 1e-8):
-    return 0 - np.sum( p * (np.log(q + eps) - np.log(p + eps + eps) ))
-
-'''
-should have predict_proba method
-
-conditional log likelihood
-'''
-def log_likelihood(probs, Y, eps = 1e-9):
-    return np.sum(np.log(probs + eps)*Y +  np.log(1-probs + eps) * (1-Y))
-
-'''
-p_c = p(c)
-p_x_c[i] = p(x|c)
-p_x_nc[i] = p(x| not c)
-'''
-def marginal_log_likelihood(p_c, p_x_c, p_x_nc, Y, eps = 1e-20):
-    result = np.log(p_c * p_x_c + (1-p_c) * p_x_nc)
-    return np.sum(result)
-
-def marginal_log_likelihood_em(p_c, p_x_c, eps = 1e-20):
-    result = np.log( np.sum(p_c * p_x_c + eps, axis = 1) ) 
-    return np.sum(result)
-
-def marginal_log_likelihood_k(P, PX, eps = 1e-20):
-    return np.sum( np.log( P * PX + eps))
-
 def conditional_likelihood_k(P, Q, eps = 1e-14):
     return (0.0 - np.sum(P * np.log(Q + eps))) / (1.0 * P.shape[0])
 
@@ -125,106 +91,6 @@ def predict_with_missing(X2_test, NB, missing, prob = False, eps=1e-8):
         return Yhat2
     else:
         return sigmoid(-Yhat3)
-
-def run_experiment(X_impute, X_test, y_test, clf, NB, a, repeat = 1, k_jump=10, K = None, FEATURES = None, return_all = False, use_clasffier_as_truth = False, use_cross_entropy = False, use_f1 = False):
-    """
-    X_impute: What value to impute for each missing features
-    X_test: 
-    y_test:
-    clf: Logistic Regression directly trained
-    NB: Naive Bayes directly trained 
-    a: LR -> NB trained model using GP (see LR2NB.py)
-    K: arrays of number of missing variables to have
-    repeat: how many times sample input with k missing values
-    FEATURES: features that might be removed
-    """
-    #X_mean = np.mean(X_train, axis=0)
-    
-    assert(not use_cross_entropy or not use_f1)
-
-    YTrue = y_test
-    if use_clasffier_as_truth:
-        YTrue = clf.predict(X_test)
-
-    features = X_test.shape[1]
-    
-    k_all = []
-    missing_err_nb_all = []
-    missing_err_lr_all = []
-    missing_err_ours_all = []
-
-    missing_err_nb = []
-    missing_err_lr = []
-    missing_err_ours = []
-    
-    if FEATURES is None:
-        FEATURES = np.array( [i for i in range(features)] )
-    else:
-         FEATURES = np.array( FEATURES )
-
-    print("Possible features to remove: {}".format(FEATURES.shape[0]))
-
-    if K is None:
-        K = [i for i in range(0, features, k_jump)]
-
-    for k in K:
-        print("K = {}".format(k))
-
-        if k > FEATURES.shape[0]:
-            print("Early stop: Only had {} features possible to remove".format(FEATURES.shape[0]))
-            break
-
-        err_nb = 0
-        err_lr = 0
-        err_ours = 0
-
-        for R in range(repeat):
-            X2_test = np.array(X_test, dtype = 'float')
-        
-            missing = np.zeros(X_test.shape, dtype=bool)
-            
-            for i in range(X2_test.shape[0]):
-                #miss = np.random.choice(X2_test.shape[1], k, replace=False)
-                miss = np.random.choice(FEATURES, k, replace=False)
-                
-                missing[i][miss] = True
-                X2_test[i][miss] = X_impute[miss]
-
-            Yhat2 = predict_with_missing(X2_test, NB, missing)
-            A_nb = np.average(Yhat2 == YTrue)
-            A_clf = np.average(clf.predict(X2_test) == YTrue)
-            A_a = np.average(a.classify(X2_test, missing) == YTrue)
-            
-            if use_f1:
-                A_nb = f1_score(YTrue,  predict_with_missing(X2_test, NB, missing))
-                A_clf = f1_score(YTrue, clf.predict(X2_test))
-                A_a = f1_score(YTrue, a.classify(X2_test, missing))
-
-            if use_cross_entropy:
-                Y_clf_prob = clf.predict_proba(X_test)[:,1]
-
-                A_nb  = cross_entropy(Y_clf_prob, predict_with_missing(X2_test, NB, missing, prob= True))
-                A_clf = cross_entropy(Y_clf_prob, clf.predict_proba(X2_test)[:,1])
-                A_a   = cross_entropy(Y_clf_prob, a.odd(X2_test, missing, prob = True))
-
-            k_all.append(k)
-            missing_err_nb_all.append(A_nb)
-            missing_err_lr_all.append(A_clf)
-            missing_err_ours_all.append(A_a)
-            
-            err_nb +=  A_nb
-            err_lr += A_clf
-            err_ours += A_a
-
-        missing_err_nb.append( err_nb/repeat )
-        missing_err_lr.append( err_lr/repeat )
-        missing_err_ours.append( err_ours/repeat )
-
-    if not return_all:
-        return missing_err_nb, missing_err_lr, missing_err_ours
-    else:
-        return k_all, missing_err_nb_all, missing_err_lr_all, missing_err_ours_all
-
 
 def run_experiment_k_paper(X_test, y_test, clf, NB, nacl, setting):
     import impyute
@@ -628,17 +494,6 @@ def load_mnist_5v3():
 
     return X_train, y_train, X_test, y_test
 
-def load_fashion_binarized():
-    
-    folder = "../data/Fashion-0-1/"
-    
-    X_train = pd.read_csv(folder + "train-0-1-images.txt").values
-    y_train = pd.read_csv(folder + "train-0-1-labels.txt").values.ravel()
-
-    X_test = pd.read_csv(folder + "test-0-1-images.txt").values
-    y_test = pd.read_csv(folder + "test-0-1-labels.txt").values.ravel()
-    
-    return X_train, y_train, X_test, y_test
 
 def load_dataset(folder, label):
         
