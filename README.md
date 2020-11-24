@@ -1,3 +1,6 @@
+This branch is the one used in the paper and used some older version. Checkout [python3-refactor](https://github.com/UCLA-StarAI/NaCL/tree/python3-refactor) branch for new versions and cleaner code.
+
+
 # NaCL: Naive Conformant Learning
 Code and experiments for the paper "[What to Expect of Classifiers? Reasoning about Logistic Regression with Missing Features](http://starai.cs.ucla.edu/papers/KhosraviIJCAI19.pdf)", published in IJCAI 2019. 
 
