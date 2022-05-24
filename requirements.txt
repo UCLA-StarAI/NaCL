@@ -2,7 +2,7 @@ numpy==1.14.2
 scipy==0.19
 sklearn
 matplotlib
-tensorflow==1.15.2
+tensorflow==2.6.4
 keras==2.0.3
 pandas==0.19.2
 gpkit
